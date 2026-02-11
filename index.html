@@ -13,11 +13,15 @@
       margin: 0;
       height: 100vh;
       font-family: 'Quicksand', sans-serif;
-      background: linear-gradient(135deg, #ffd1dc, #ffe6f0);
+      background:
+        linear-gradient(135deg, rgba(255,209,220,0.85), rgba(255,230,240,0.85)),
+        url("https://i.pinimg.com/originals/ef/f4/be/eff4be08d90db3e8d30a322101e945ae.gif")
+          center/cover no-repeat;
       display: flex;
       justify-content: center;
       align-items: center;
       overflow: hidden;
+      transition: background-image 0.3s ease;
     }
 
     .container {
@@ -101,7 +105,7 @@
   </style>
 </head>
 
-<body>
+<body id="bg">
   <div class="hearts" id="hearts"></div>
 
   <div class="container">
@@ -116,11 +120,26 @@
   </div>
 
   <script>
+    const body = document.getElementById("bg");
     const noBtn = document.getElementById("no");
     const yesBtn = document.getElementById("yes");
     const message = document.getElementById("message");
     const heartsContainer = document.getElementById("hearts");
     const buttonsContainer = document.querySelector(".buttons");
+
+    // BACKGROUND GIF
+    const gifUrl =
+      "https://i.pinimg.com/originals/ef/f4/be/eff4be08d90db3e8d30a322101e945ae.gif";
+
+    function restartGif() {
+      body.style.backgroundImage = `
+        linear-gradient(135deg, rgba(255,209,220,0.85), rgba(255,230,240,0.85)),
+        url("${gifUrl}?t=${Date.now()}")
+      `;
+    }
+
+    // Riavvia la GIF ogni 3 secondi
+    setInterval(restartGif, 3000);
 
     const phrases = [
       "Ehi… io ci tenevo davvero 🥺",
