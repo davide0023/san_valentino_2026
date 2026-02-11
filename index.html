@@ -22,12 +22,14 @@
       align-items: center;
       overflow: hidden;
       transition: background-image 0.3s ease;
+      position: relative;
     }
 
     .container {
       text-align: center;
       color: #7a2e4d;
       padding: 20px;
+      z-index: 2;
     }
 
     h1 {
@@ -82,6 +84,7 @@
       height: 100%;
       pointer-events: none;
       overflow: hidden;
+      z-index: 1;
     }
 
     .heart {
@@ -93,14 +96,37 @@
     }
 
     @keyframes floatUp {
-      from {
-        transform: translateY(0);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(-110vh);
-        opacity: 1;
-      }
+      from { transform: translateY(0); opacity: 0; }
+      to { transform: translateY(-110vh); opacity: 1; }
+    }
+
+    /* Tasto cuore musica */
+    #musicBtn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      font-size: 50px;
+      cursor: pointer;
+      user-select: none;
+      z-index: 3;
+      transition: transform 0.2s ease, filter 0.2s ease;
+      filter: drop-shadow(0 0 15px rgba(255, 100, 150, 0.7));
+    }
+
+    #musicBtn:hover {
+      transform: scale(1.2);
+    }
+
+    #musicBtn.playing {
+      animation: beat 1s infinite;
+    }
+
+    @keyframes beat {
+      0%   { transform: scale(1); }
+      25%  { transform: scale(1.15); }
+      50%  { transform: scale(1); }
+      75%  { transform: scale(1.15); }
+      100% { transform: scale(1); }
     }
   </style>
 </head>
@@ -119,6 +145,14 @@
     <div class="message" id="message"></div>
   </div>
 
+  <!-- Tasto cuore musica -->
+  <div id="musicBtn">❤️</div>
+
+  <!-- Audio locale -->
+  <audio id="music" loop>
+    <source src="soundtrack_castle_howl.mp3" type="audio/mpeg">
+  </audio>
+
   <script>
     const body = document.getElementById("bg");
     const noBtn = document.getElementById("no");
@@ -126,21 +160,20 @@
     const message = document.getElementById("message");
     const heartsContainer = document.getElementById("hearts");
     const buttonsContainer = document.querySelector(".buttons");
+    const musicBtn = document.getElementById("musicBtn");
+    const music = document.getElementById("music");
 
     // BACKGROUND GIF
-    const gifUrl =
-      "https://i.pinimg.com/originals/ef/f4/be/eff4be08d90db3e8d30a322101e945ae.gif";
-
+    const gifUrl = "https://i.pinimg.com/originals/ef/f4/be/eff4be08d90db3e8d30a322101e945ae.gif";
     function restartGif() {
       body.style.backgroundImage = `
         linear-gradient(135deg, rgba(255,209,220,0.85), rgba(255,230,240,0.85)),
         url("${gifUrl}?t=${Date.now()}")
       `;
     }
-
-    // Riavvia la GIF ogni 3 secondi
     setInterval(restartGif, 3000);
 
+    // FRASI
     const phrases = [
       "Ehi… io ci tenevo davvero 🥺",
       "Prometto che ti farò sorridere 💕",
@@ -148,29 +181,26 @@
       "Con me avrai protezione, perchè ciò che cè di bello in questo mondo va protetto 💖",
       "Non ti preoccupare di quello che stai provando, lo provo anche io per te 💖"
     ];
-
     let count = 0;
 
+    // NO che scappa
     noBtn.addEventListener("mouseover", moveButton);
     noBtn.addEventListener("click", moveButton);
 
     function moveButton() {
       const containerRect = buttonsContainer.getBoundingClientRect();
       const btnRect = noBtn.getBoundingClientRect();
-
       const maxX = containerRect.width - btnRect.width;
       const maxY = containerRect.height - btnRect.height;
-
       const x = Math.random() * maxX;
       const y = Math.random() * maxY;
-
       noBtn.style.left = `${x}px`;
       noBtn.style.top = `${y}px`;
-
       message.textContent = phrases[count % phrases.length];
       count++;
     }
 
+    // CLICK SÌ
     yesBtn.addEventListener("click", () => {
       document.body.innerHTML = `
         <div style="
@@ -195,7 +225,7 @@
       `;
     });
 
-    // Cuoricini animati
+    // CUORICINI ANIMATI
     setInterval(() => {
       const heart = document.createElement("div");
       heart.classList.add("heart");
@@ -203,11 +233,34 @@
       heart.style.left = Math.random() * 100 + "vw";
       heart.style.animationDuration = 4 + Math.random() * 3 + "s";
       heartsContainer.appendChild(heart);
-
-      setTimeout(() => {
-        heart.remove();
-      }, 7000);
+      setTimeout(() => heart.remove(), 7000);
     }, 500);
+
+    // 🎵 MUSICA MP3
+    let playing = false;
+
+    musicBtn.addEventListener("click", () => {
+      if (!playing) {
+        music.volume = 0; // fade-in
+        music.play().catch(()=>{});
+        playing = true;
+        musicBtn.classList.add("playing");
+
+        // fade-in graduale
+        const fade = setInterval(() => {
+          if (music.volume < 0.3) {
+            music.volume += 0.02;
+          } else {
+            clearInterval(fade);
+          }
+        }, 200);
+      } else {
+        // clic successivo = pausa
+        music.pause();
+        playing = false;
+        musicBtn.classList.remove("playing");
+      }
+    });
   </script>
 </body>
 </html>
